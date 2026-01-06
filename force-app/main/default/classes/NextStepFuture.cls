@@ -27,9 +27,24 @@ public with sharing class NextStepFuture {
      * Opportunity Next Step field is a standard field
      * Update the corresponding test class AsynchronousTest and test method nextStepFuture_testUpdateAllNextStep to cover test this method
      */
-    //[public | private ] [static] data_type method_name (input parameters) {
+    @future
+    public static void futureUpdateAccOppNextStep (String accId) {
     //  The body of the method
-    //}
+        Account acct = [SELECT Id, Name, Next_Step__c FROM Account WHERE Id = :accId];
+        if(String.isBlank(acct.Next_Step__c)){
+            acct.Next_Step__c = 'Meeting in the future';
+            update acct;
+        }
+        List<Opportunity> oppsToUpdate = new List<Opportunity> ();
+        List<Opportunity> opps = [SELECT Id, Name, NextStep, AccountId FROM Opportunity WHERE AccountId = :accId];
+        for(Opportunity opp :opps){
+            if(String.isBlank(opp.NextStep)){
+                opp.NextStep = 'Meeting in the future';
+                oppsToUpdate.add(opp);
+            }
+        }
+        update oppsToUpdate;
+    }
 
     /*
     * Question 2
@@ -38,16 +53,18 @@ public with sharing class NextStepFuture {
     * Update the corresponding test class AsynchronousTest and test method nextStepFuture_testCreateDealAndUpdateRole to cover test this method
     */
     //Mix DML Error happens when you try to perform DML operations on setup and non-setup objects in a single transaction.
+   
     public static void createDealAndUpdateRole() {
-        Opportunity bigDeal = new Opportunity();
-        insertBigDeal(bigDeal);
+        //Opportunity bigDeal = new Opportunity();
+        insertBigDeal();
 
-        UserRole[] roles = [SELECT Id, Name FROM UserRole WHERE Id = :UserInfo.getUserRoleId() OR Name = 'CRO' LIMIT 1];
-        updateUserRoleName(roles);
+        //UserRole[] roles = [SELECT Id, Name FROM UserRole WHERE Id = :UserInfo.getUserRoleId() OR Name = 'CRO' LIMIT 1];
+        updateUserRoleName();
     }
 
     // Helper method to insert big deal
-    private static void insertBigDeal(Opportunity opp) {
+    private static void insertBigDeal() {
+        Opportunity opp = new Opportunity();
         opp.Amount = 1000000;
         opp.Name = 'Big Deal';
         opp.StageName = 'Closed Won'; 
@@ -58,19 +75,25 @@ public with sharing class NextStepFuture {
 
 
     // Helper method to update role name
-    private static void updateUserRoleName(UserRole[] roles){
-        UserRole role;
-        if (roles.isEmpty()) {
-            role = new UserRole();
-            role.portalType = 'None'; 
-            role.CaseAccessForAccountOwner = 'Edit'; 
-            // role.OpportunityAccessForAccountOwner = 'Edit'; //This may need to be uncommented depending on your orgs Organization Wide Defaults(OWD) settings. If you are receiving FIELD_INTEGRITY_EXCEPTION, field integrity exception: unknown (Opportunity access level below organization default): [unknown], uncomment this line.
-        } else {
-            role = roles[0];
-        }
+     @future
+    private static void updateUserRoleName(){
+        //UserRole role;
+        //for(UserRole role: roles){
+            //if (role.isEmpty()) {
+                UserRole role = [SELECT Id, Name FROM UserRole WHERE Id = :UserInfo.getUserRoleId() OR Name = 'CRO' LIMIT 1];
+                //role = new UserRole();
+                role.Name = 'CRO';
+                //role.portalType = 'None'; 
+                role.CaseAccessForAccountOwner = 'Edit'; 
+                role.OpportunityAccessForAccountOwner = 'Edit'; //This may need to be uncommented depending on your orgs Organization Wide Defaults(OWD) settings. If you are receiving FIELD_INTEGRITY_EXCEPTION, field integrity exception: unknown (Opportunity access level below organization default): [unknown], uncomment this line.
+            //} 
+            /*else {
+                role = roles[0];
+            }*/
+        //}  
 
-        role.Name = 'CRO';
+        //role.Name = 'CRO';
 
-        upsert role;
+        update role;
     }
 }
