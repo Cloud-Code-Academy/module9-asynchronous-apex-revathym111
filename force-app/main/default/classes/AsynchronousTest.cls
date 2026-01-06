@@ -44,6 +44,9 @@ public with sharing class AsynchronousTest {
         // Call the method to test between the startTest and stopTest methods
         Test.startTest();
         //YOUR CODE HERE
+        for(Account acc:testAccounts){
+            NextStepFuture.futureUpdateAccOppNextStep(acc.Id);
+        }
         Test.stopTest();
 
         // Query the updated accounts and opportunities
@@ -60,7 +63,7 @@ public with sharing class AsynchronousTest {
             System.assertEquals('Meeting in the future', opp.NextStep, 'Opportunity NextStep field was not updated correctly.');
         }
     }
-
+    
     @IsTest
     static void nextStepFuture_testCreateDealAndUpdateRole() {        
         Test.startTest();
@@ -76,7 +79,7 @@ public with sharing class AsynchronousTest {
         UserRole[] updatedRoles = [SELECT Id, Name FROM UserRole WHERE Name = 'CRO' LIMIT 1];
         System.assertEquals(1, updatedRoles.size(), 'UserRole should exist.');
     }
-
+    
     @IsTest
     static void nextStepQueueable_testEnqueueJob() {
         // Create test data
@@ -148,7 +151,7 @@ public with sharing class AsynchronousTest {
         }
     }
 
-    /*  //UNCOMMENT TEST METHODS BELOW ONCE THE NextStepSchedule class is implemented
+        //UNCOMMENT TEST METHODS BELOW ONCE THE NextStepSchedule class is implemented
         //No Changes should be required to the test methods/code below other than uncommenting them
         //Manually setup the scheduled job in Salesforce to run the NextStepSchedule class
     @IsTest
@@ -189,5 +192,5 @@ public with sharing class AsynchronousTest {
             System.assertEquals('Batching the next meetings together.', opp.NextStep, 'Opportunity NextStep field was not updated correctly.');
         }
     }
-    */
+    
 }
